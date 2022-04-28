@@ -888,6 +888,7 @@ class _PSO(base.Optimizer):
         self._uid_queue = base.utils.UidQueue()
         self.population: tp.Dict[str, p.Parameter] = {}
         self._best = self.parametrization.spawn_child()
+        self.new_particle_spawner = None
 
     def _internal_ask_candidate(self) -> p.Parameter:
         # population is increased only if queue is empty (otherwise tell_not_asked does not work well at the beginning)
@@ -898,6 +899,8 @@ class _PSO(base.Optimizer):
             candidate.heritage["speed"] = (
                 self._rng.normal(size=dim) if self._eps is None else self._rng.uniform(-1, 1, dim)
             )
+            if self.new_particle_spawner is not None:
+                self.new_particle_spawner.populate( len(self.population), candidate )
             self._uid_queue.asked.add(candidate.uid)
             return candidate
         uid = self._uid_queue.ask()
